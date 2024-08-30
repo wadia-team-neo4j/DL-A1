@@ -3,8 +3,81 @@ DLassi1.ipynb_
 Notebook unstarred
 
 1) Write a python program to implement and plot the given below Activation Functions of neural networks. a) Linear b) Sigmoid c) Tanh d) ReLU e) Softmax
+import numpy as np
+import matplotlib.pyplot as plt
 
-Implement a Single layer perceptron using a tensorflow library and calculate the accuracy of the model on the testing data. (Use MNIST dataset)
+# Linear activation functions
+def linear(x):
+    return x
+
+# Sigmoid activation functions
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+# Tanh activation functions
+def tanh(x):
+    return np.tanh(x)
+
+# ReLU activation functions
+def relu(x):
+    return np.maximum(0, x)
+
+# Softmax activation functions
+def softmax(x):
+    exp_x = np.exp(x - np.max(x))  # Stability improvement by subtracting max
+    return exp_x / exp_x.sum(axis=0)
+
+# range of input values
+x = np.linspace(-10, 10, 100)
+
+# Plot each activation function
+plt.figure(figsize=(12, 8))
+
+# Linear Activation Function return: f(x)=x
+plt.subplot(2, 3, 1)
+plt.plot(x, linear(x), label='Linear', color='b')
+plt.title('Linear Activation')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.grid()
+
+# Sigmoid
+plt.subplot(2, 3, 2)
+plt.plot(x, sigmoid(x), label='Sigmoid', color='g')
+plt.title('Sigmoid Activation')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.grid()
+
+# Tanh
+plt.subplot(2, 3, 3)
+plt.plot(x, tanh(x), label='Tanh', color='r')
+plt.title('Tanh Activation')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.grid()
+
+# ReLU
+plt.subplot(2, 3, 4)
+plt.plot(x, relu(x), label='ReLU', color='m')
+plt.title('ReLU Activation')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.grid()
+
+# Softmax
+x_for_softmax = np.linspace(-5, 5, 10)
+plt.subplot(2, 3, 5)
+plt.plot(x_for_softmax, softmax(x_for_softmax), label='Softmax', color='c')
+plt.title('Softmax Activation')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.grid()
+
+plt.tight_layout()
+plt.show()
+
+2]Implement a Single layer perceptron using a tensorflow library and calculate the accuracy of the model on the testing data. (Use MNIST dataset)
 
 import tensorflow as tf
 from tensorflow.keras.datasets import mnist
