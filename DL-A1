@@ -1,3 +1,87 @@
+ASSGN4 A1)
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, SimpleRNN, Dense
+
+# Load shakespeare.txt (only first 250 characters)
+with open('/content/sample_data/shakespeare.txt', 'r') as file:
+    text = file.read()[:250]
+
+# Preprocess the text
+tokenizer = Tokenizer(char_level=True)  # Character-level tokenization
+tokenizer.fit_on_texts([text])
+total_chars = len(tokenizer.word_index) + 1  # Total unique characters
+
+# Convert the text into a sequence of integers
+input_sequences = []
+next_chars = []
+seq_length = 40  # Let's take 40 characters as input sequence
+
+for i in range(0, len(text) - seq_length):
+    input_sequences.append(text[i: i + seq_length])
+    next_chars.append(text[i + seq_length])
+
+# Convert input sequences to integer sequences
+X = np.array([tokenizer.texts_to_sequences([seq])[0] for seq in input_sequences])
+y = np.array([tokenizer.texts_to_sequences([next_char])[0][0] for next_char in next_chars])
+
+# Convert output to categorical (one-hot encoding)
+y = to_categorical(y, num_classes=total_chars)
+
+# Define the RNN model
+model = Sequential()
+model.add(Embedding(input_dim=total_chars, output_dim=64, input_length=seq_length))
+model.add(SimpleRNN(128, activation='relu', return_sequences=False))  # RNN with ReLU
+model.add(Dense(total_chars, activation='softmax'))  # Softmax for multi-class prediction
+
+# Compile the model
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+# Train the model
+model.fit(X, y, batch_size=64, epochs=100)
+
+# Save the model
+model.save('shakespeare_rnn.h5')
+# Load the pre-trained model (if available)
+pretrained_model = tf.keras.models.load_model('shakespeare_rnn.h5')
+
+def predict_text(seed_text, model, tokenizer, seq_length, num_chars_to_generate=100):
+    # Ensure the seed_text is at least seq_length long by padding if necessary
+    if len(seed_text) < seq_length:
+        seed_text = seed_text.rjust(seq_length)  # Pad with spaces on the left if needed
+    
+    for _ in range(num_chars_to_generate):
+        # Tokenize the last 'seq_length' characters from the seed_text
+        token_list = tokenizer.texts_to_sequences([seed_text[-seq_length:]])[0]
+        
+        # Ensure token_list has the correct length (seq_length)
+        token_list = np.pad(token_list, (seq_length - len(token_list), 0), 'constant')
+        
+        # Reshape for model input
+        token_list = np.reshape(token_list, (1, seq_length))
+        
+        # Predict the next character
+        predicted = np.argmax(model.predict(token_list, verbose=0), axis=-1)
+        
+        # Convert the predicted index back to the corresponding character
+        output_char = tokenizer.index_word[predicted[0]]
+        
+        # Append the predicted character to the seed_text
+        seed_text += output_char
+        
+    return seed_text
+
+
+# Example of generating new text
+seed_text = "To be, or not to be, that is the question:\n"
+generated_text = predict_text(seed_text, pretrained_model, tokenizer, seq_length, num_chars_to_generate=100)
+print(generated_text)
+
+
+
+
 
 DLassi1.ipynb_
 Notebook unstarred
